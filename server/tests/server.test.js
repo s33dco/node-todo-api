@@ -1,9 +1,12 @@
 const expect    = require('expect');
 const request   = require('supertest');
-const {ObjectID}= require('mongodb');
+const {ObjectID}= require('mongodb');   // so object id can be set for seed todos
 
 const {app}     = require('./../server');
 const {Todo}    = require('./../models/todo');
+
+
+// seed data for tests
 
 const todos   = [{
     _id: new ObjectID(),
@@ -12,6 +15,8 @@ const todos   = [{
     _id: new ObjectID(),
   text : 'Second thing todo'
 }];
+
+// set database before each test is run
 
 beforeEach((done) => {
   Todo.deleteMany({}).then(() => {
@@ -40,6 +45,7 @@ describe('POST /todos', () => {
         expect(todos[0].text).toBe(text);
         done();
       }).catch((e) => done(e));
+
     });
   });
 
@@ -75,7 +81,7 @@ describe('GET/todos', () => {
 describe('GET/todos/:id', () => {
   it('should return todo doc', (done) => {
     request(app)
-      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .get(`/todos/${todos[0]._id.toHexString()}`) // template string grabbing object id of 1st in todos array seed data
       .expect(200)
       .expect((res) => {
         expect(res.body.todo.text).toBe(todos[0].text);
@@ -83,16 +89,16 @@ describe('GET/todos/:id', () => {
   });
 
   it('should return a 404 if todo not found', (done) => {
-    id = new ObjectID();
+    hexId = new ObjectID();    // make a valid ObjectID not in db
     request(app)
-      .get(`/todos/${id}`)
+      .get(`/todos/${hexId}`)
       .expect(404)
       .end(done);
   });
 
   it('should return a 404 for non ObjectIds', (done) => {
     request(app)
-      .get('/todos/notanid')
+      .get('/todos/notanid') // notanid invalid ObjectID
       .expect(404)
       .end(done);
   });

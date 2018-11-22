@@ -1,4 +1,4 @@
-const {ObjectID}  = require('mongodb');
+const {ObjectID}  = require('mongodb');  // load in ObjectID from mongo native driver for util methods .isValid?
 
 const {mongoose}  = require('./../server/db/mongoose');
 const {Todo}      = require('./../server/models/todo');

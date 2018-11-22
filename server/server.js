@@ -7,7 +7,7 @@ const {Todo}      = require("./models/todo");
 const {User}      = require("./models/user");
 
 let app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000; // for heroku or 3000 for localhost
 
 app.use(bodyParser.json());
 
@@ -30,11 +30,11 @@ app.get('/todos', (req, res) => {
   });
 });
 
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', (req, res) => {  // :id sets up parameter on req object
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
-    return res.status(404).send();
+    return res.status(404).send();  // as ever return prevents function execution
   }
 
   Todo.findById(id).then((todo) => {
