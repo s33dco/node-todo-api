@@ -5,19 +5,18 @@ const {ObjectID}= require('mongodb');   // so object id can be set for seed todo
 const {app}     = require('./../server');
 const {Todo}    = require('./../models/todo');
 
-
 // seed data for tests
-
-const todos   = [{
+const todos   = [
+  {
     _id: new ObjectID(),
   text : 'First thing todo'
   },{
     _id: new ObjectID(),
   text : 'Second thing todo'
-}];
+}
+];
 
 // set database before each test is run
-
 beforeEach((done) => {
   Todo.deleteMany({}).then(() => {
     return Todo.insertMany(todos);
@@ -79,7 +78,7 @@ describe('GET/todos', () => {
 });
 
 describe('GET/todos/:id', () => {
-  it('should return todo doc', (done) => {
+  it('should remove a todo', (done) => {
     request(app)
       .get(`/todos/${todos[0]._id.toHexString()}`) // template string grabbing object id of 1st in todos array seed data
       .expect(200)
@@ -99,6 +98,45 @@ describe('GET/todos/:id', () => {
   it('should return a 404 for non ObjectIds', (done) => {
     request(app)
       .get('/todos/notanid') // notanid invalid ObjectID
+      .expect(404)
+      .end(done);
+  });
+});
+
+describe('DELETE/todos/:id', () => {
+  it('should remove todo', (done) => {
+    let hexId = todos[1]._id.toHexString();
+
+    request(app)
+      .delete(`/todos/${hexId}`) // template string grabbing object id of 1st in todos array seed data
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(hexId);
+      })
+      .end((err, res ) => {
+        if (err) {
+          return done(err);
+        }
+
+        Todo.findById(hexId).then((todo) => {
+          expect(todo).toBeFalsy();
+          done();
+        })
+        .catch((e) => done(e));
+      });
+  });
+
+  it('should return a 404 if todo not found', (done) => {
+    hexId = new ObjectID();    // make a valid ObjectID not in db
+    request(app)
+      .delete(`/todos/${hexId}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return a 404 for non ObjectIds', (done) => {
+    request(app)
+      .delete('/todos/notanid') // notanid invalid ObjectID
       .expect(404)
       .end(done);
   });
