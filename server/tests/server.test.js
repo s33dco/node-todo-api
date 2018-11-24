@@ -4,7 +4,7 @@ const {ObjectID}= require('mongodb');   // so object id can be set for seed todo
 
 const {app}     = require('./../server');
 const {Todo}    = require('./../models/todo');
-  
+
 // seed data for tests
 const todos   = [
   {
@@ -12,7 +12,9 @@ const todos   = [
   text : 'First thing todo'
   },{
     _id: new ObjectID(),
-  text : 'Second thing todo'
+  text : 'Second thing todo',
+  completed: true,
+  completedAt : 333
 }
 ];
 
@@ -140,4 +142,47 @@ describe('DELETE/todos/:id', () => {
       .expect(404)
       .end(done);
   });
+});
+
+describe('PATCH/todos/:id', () => {
+
+  it('should update the todo', (done) => {
+    let hexId = todos[0]._id.toHexString();
+    let text = 'new text';
+    let now = new Date().getTime();
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .send({
+        completed: true,
+        text
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(true);
+        expect(res.body.todo.completedAt).toBeGreaterThanOrEqual(now);
+      })
+      .end(done);
+  });
+
+
+  it('should clear completedAt when todo is not completed', (done) => {
+    let hexId = todos[1]._id.toHexString();
+    let text = 'newest text';
+    request(app)
+      .patch(`/todos/${hexId}`)
+      .send({
+        completed: false,
+        text
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(false);
+        expect(res.body.todo.completedAt).toBeNull();
+      })
+      .end(done);
+  });
+
+
 });

@@ -69,7 +69,7 @@ app.delete('/todos/:id', (req, res) => {  // :id sets up parameter on req object
 
 app.patch('/todos/:id', (req, res) => {
   var id = req.params.id;
-  var body = _.pick(req.body, ['text', 'completed']);
+  var body = _.pick(req.body, ['text', 'completed']); // only these attributes accepted via lodash
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
