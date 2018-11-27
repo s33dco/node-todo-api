@@ -32,7 +32,9 @@ let UserSchema = new mongoose.Schema({
   }]
 });
 
+// .methods are instance methods
 // limit JSON returned to include just _id and email (no tokens, passwords etc)
+// not using arrow function as does not bind this
 
 UserSchema.methods.toJSON = function () {
   let user = this;
@@ -40,9 +42,6 @@ UserSchema.methods.toJSON = function () {
 
   return _.pick(userObject, ['_id', 'email']);
 };
-
-
-// not using arrow function as does not bind this
 
 UserSchema.methods.generateAuthToken = function () {
   let user = this;
@@ -55,6 +54,24 @@ UserSchema.methods.generateAuthToken = function () {
   return user.save().then(() => {
     return token;
   })
+};
+
+// .statics are model methods
+
+UserSchema.statics.findByToken = function (token) {
+  let User = this;
+  let decoded; // not decoded = jwt.verify incase of error....
+
+  try {
+    decoded = jwt.verify(token, 'abc123');
+  } catch (e) {                                 // jwt.verify fails so promise with reject returned
+    return Promise.reject();
+  }
+  return User.findOne({   //success case returns promise to server.js, the relevant user object
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
+  });
 };
 
 let User = mongoose.model('User', UserSchema);

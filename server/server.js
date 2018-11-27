@@ -8,6 +8,7 @@ const {ObjectID}  = require('mongodb');
 const {mongoose}  = require('./db/mongoose');
 const {Todo}      = require("./models/todo");
 const {User}      = require("./models/user");
+const {authenticate} = require('./middleware/authenticate');
 
 let app = express();
 const port = process.env.PORT;
@@ -33,7 +34,7 @@ app.get('/todos', (req, res) => {
   });
 });
 
-app.get('/todos/:id', (req, res) => {  // :id sets up parameter on req object
+app.get('/todos/:id', (req, res) => {           // :id sets up parameter on req object
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
@@ -51,7 +52,7 @@ app.get('/todos/:id', (req, res) => {  // :id sets up parameter on req object
   });
 });
 
-app.delete('/todos/:id', (req, res) => {  // :id sets up parameter on req object
+app.delete('/todos/:id', (req, res) => {        // :id sets up parameter on req object
   let id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
@@ -109,7 +110,9 @@ app.post('/users', (req, res) => {
   });
 });
 
-
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
 
 
 
