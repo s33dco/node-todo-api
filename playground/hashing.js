@@ -2,32 +2,50 @@ const {SHA256} = require('crypto-js');
 
 const jwt = require('jsonwebtoken');
 
-let data = {
-  id: 10
-}
+const bcrypt = require('bcryptjs');
 
-// check jwt.io
-// jwt creates tokem with following output
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImlhdCI6MTU0MzMxMzE2MX0.X98hjPGDJdn3hKTBoCdKTtok6QyFBeuXje1D39LzCUA
-// header includes encoding and type (before first dot)
-// payload includes data and iat (issued at timestamp) (between 2nd and 3rd)
-// verification (after 2nd . ) (either vliad or invalid)
+let password = '123abc!';
 
-let token = jwt.sign(data, '123abc');
+bcrypt.genSalt(10, (err, salt) => {
+  bcrypt.hash(password, salt, (err, hash) => {
+    console.log(hash);
+  });
+});
 
-console.log('token string:', token);
+let hashedPassword = '$2a$10$RmJNRGcUgwrhR8DFX3oi2eWZ3UlU1/I6o7CRbx/rTAecYuvD.Sy/C';
 
-let decoded = jwt.verify(token, '123abc');
-console.log ('decoded :', decoded);
+bcrypt.compare('password', hashedPassword, (err, res) => {
+  console.log(res);
+});
 
 
-
-
-// //
-// // let message = "I am the one and only";
-// // let hash = SHA256(message).toString();
-// //
-// //
+//
+// let data = {
+//   id: 10
+// }
+//
+// // check jwt.io
+// // jwt creates tokem with following output
+// // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsImlhdCI6MTU0MzMxMzE2MX0.X98hjPGDJdn3hKTBoCdKTtok6QyFBeuXje1D39LzCUA
+// // header includes encoding and type (before first dot)
+// // payload includes data and iat (issued at timestamp) (between 2nd and 3rd)
+// // verification (after 2nd . ) (either vliad or invalid)
+//
+// let token = jwt.sign(data, '123abc');
+//
+// console.log('token string:', token);
+//
+// let decoded = jwt.verify(token, '123abc');
+// console.log ('decoded :', decoded);
+//
+//
+//
+//
+// // //
+// // // let message = "I am the one and only";
+// // // let hash = SHA256(message).toString();
+// // //
+// // //
 // // let messages = ['the one and only', 'they think it is all over', 'reasons to be cheerfull part 3',
 // //                 'bye bye mr american pie, took my chevvy to the levvy but the levy was dry',
 // //                 'first i was afraid i was petrified.....', 'first i was afraid i was petrified.....',
