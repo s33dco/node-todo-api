@@ -4,26 +4,13 @@ const {ObjectID}= require('mongodb');   // so object id can be set for seed todo
 
 const {app}     = require('./../server');
 const {Todo}    = require('./../models/todo');
+const { todos, populateTodos, users, populateUsers} = require('./seed/seed');
 
-// seed data for tests
-const todos   = [
-  {
-    _id: new ObjectID(),
-  text : 'First thing todo'
-  },{
-    _id: new ObjectID(),
-  text : 'Second thing todo',
-  completed: true,
-  completedAt : 333
-}
-];
+
 
 // set database before each test is run
-beforeEach((done) => {
-  Todo.deleteMany({}).then(() => {
-    return Todo.insertMany(todos);
-  }).then(() => done());
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
   it('should create a new todo', (done) => {
