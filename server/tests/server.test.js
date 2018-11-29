@@ -4,8 +4,8 @@ const {ObjectID}= require('mongodb');   // so object id can be set for seed todo
 
 const {app}     = require('./../server');
 const {Todo}    = require('./../models/todo');
+const {User}    = require('./../models/user');
 const { todos, populateTodos, users, populateUsers} = require('./seed/seed');
-
 
 
 // set database before each test is run
@@ -111,8 +111,7 @@ describe('DELETE/todos/:id', () => {
           expect(todo).toBeFalsy();
           done();
         })
-        .catch((e) => done(e));
-      });
+    });
   });
 
   it('should return a 404 if todo not found', (done) => {
@@ -172,4 +171,79 @@ describe('PATCH/todos/:id', () => {
   });
 
 
+});
+
+describe('GET/users/me', () => {
+  it('should return a user if authenticated', (done) => {
+
+    // use users[0] to generate x-auth token
+    request(app)
+      .get('/users/me')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body._id).toBe(users[0]._id.toHexString());
+        expect(res.body.email).toBe(users[0].email);
+      }).end(done);
+  });
+
+  it('should return a 401 if not authenticated', (done) => {
+    request(app)
+      .get('/users/me')
+      .expect(401)
+      .expect((res) => {
+        expect(res.body).toEqual({});
+      }).end(done);
+  });
+});
+
+describe('POST/users', () => {
+  it('should create a user', (done) => {
+    let email = 'newperson@example.com';
+    let password = '123456abc';
+
+    request(app)
+      .post('/users')
+      .send({email, password})
+      .expect(200)
+      .expect( (res) => {
+        expect(res.headers['x-auth']).toBeTruthy();
+        expect(res.body.email).toBe(email);
+      })
+      .end((err) => {       // take it a little further
+        if (err) {
+          return done(err); // if error break out on done with error
+        }
+        User.findOne({email}).then((user) => {      // query db to inspect user
+          expect(user).toBeTruthy();                   // expect to find user
+          expect(user.password).not.toBe(password);  // expect password has been hashed
+          done();
+      });
+    });
+  });
+
+  it('should return validation errors if request invalid', (done) => {
+    request(app)
+      .post('/users')
+      .send({
+        email: 'frank',
+        password: '1'})
+      .expect(400)
+      .expect( (res) => {
+        expect(res.body._message).toEqual("User validation failed")
+      }).end(done);
+  });
+
+  it('should not create a user if email in use', (done) => {
+    let email = users[0].email;
+    let password = '4brandn3wPa55word';
+
+    request(app)
+      .post('/users')
+      .send({
+        email: users[0].email,
+        password: '4brandn3wPa55word'})
+      .expect(400)
+      .end(done);
+  });
 });
