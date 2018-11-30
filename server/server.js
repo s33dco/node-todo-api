@@ -114,7 +114,19 @@ app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
 });
 
+app.post('/users/login', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
 
+  User.findByCredentials(body.email, body.password).then((user) => { // success case returns user
+    return user.generateAuthToken().then((token) => {    // generate token on validated user keep promise chaining incase of errors
+      res.header('x-auth',token).send(user);      //respond by setting x-auth token in header and send user back
+    });
+  }).catch((e) => {
+    res.status(400).send();                      // faliure returns 400
+  })
+
+
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);

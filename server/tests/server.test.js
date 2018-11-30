@@ -1,11 +1,11 @@
-const expect    = require('expect');
-const request   = require('supertest');
-const {ObjectID}= require('mongodb');   // so object id can be set for seed todos
+const expect      = require('expect');
+const request     = require('supertest');
+const {ObjectID}  = require('mongodb');   // so object id can be set for seed todos
 
-const {app}     = require('./../server');
-const {Todo}    = require('./../models/todo');
-const {User}    = require('./../models/user');
-const { todos, populateTodos, users, populateUsers} = require('./seed/seed');
+const {app}       = require('./../server');
+const {Todo}      = require('./../models/todo');
+const {User}      = require('./../models/user');
+const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
 
 
 // set database before each test is run
