@@ -131,7 +131,6 @@ describe('DELETE/todos/:id', () => {
 });
 
 describe('PATCH/todos/:id', () => {
-
   it('should update the todo', (done) => {
     let hexId = todos[0]._id.toHexString();
     let text = 'new text';
@@ -151,7 +150,6 @@ describe('PATCH/todos/:id', () => {
       .end(done);
   });
 
-
   it('should clear completedAt when todo is not completed', (done) => {
     let hexId = todos[1]._id.toHexString();
     let text = 'newest text';
@@ -169,8 +167,6 @@ describe('PATCH/todos/:id', () => {
       })
       .end(done);
   });
-
-
 });
 
 describe('GET/users/me', () => {
@@ -218,7 +214,7 @@ describe('POST/users', () => {
           expect(user).toBeTruthy();                   // expect to find user
           expect(user.password).not.toBe(password);  // expect password has been hashed
           done();
-      });
+      }).catch((e) => done(e));
     });
   });
 
@@ -245,5 +241,55 @@ describe('POST/users', () => {
         password: '4brandn3wPa55word'})
       .expect(400)
       .end(done);
+  });
+});
+
+describe('POST/users/login', () => {
+  it('should login in user and return auth token', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({
+        email: users[1].email,
+        password: users[1].password
+      })
+      .expect(200)
+      .expect( (res) => {
+        expect(res.headers['x-auth']).toBeTruthy();  //use bracket notation as hyphen in x-auth
+      })
+      .end((err, res) => {                         // call end then custom function to query db
+        if (err) {                                   // if error return done(err) so gets printed to screen
+          return done(err);
+        }
+
+        User.findById(users[1]._id).then((user) =>{ // else find user by id then expect
+          expect(user.tokens[0]).toMatchObject({          // in tokens array for user on db
+            access: 'auth',
+            token : res.headers['x-auth']             // same token in db as in header
+          });
+          done();
+        }).catch((e) => done(e));                     // catch call for errors
+      });
+  });
+
+  it('should reject invalid login', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({
+        email: users[1].email,
+        password: 'incorrectPassword'
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toBeFalsy();  //use bracket notation as hyphen in x-auth
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        User.findById(users[1]._id).then((user) => { // else find user by id then expect
+          expect(user.tokens.length).toBe(0);              // no tokens on db
+          done();
+        }).catch((e) => done(e));                     // catch call for errors
+      });
   });
 });
