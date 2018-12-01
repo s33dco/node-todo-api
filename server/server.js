@@ -129,7 +129,7 @@ app.post('/users/login', (req, res) => {
 });
 
 app.delete('/users/me/token', authenticate, (req, res) => {
-  req.user.removeToken(req.token).then(() => {  // instance method User, token already present in req (authenticate)
+  req.user.removeToken(req.token).then(() => {  
     res.status(200).send();
   }, () => {
     res.status(400).send();
