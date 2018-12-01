@@ -59,7 +59,7 @@ UserSchema.methods.generateAuthToken = function () {
 
 UserSchema.methods.removeToken = function (token) {
   let user = this;                            // user user object
-  return user.updateOne({                        // update doc with $pull
+  return user.updateOne({                     // update doc with $pull
     $pull: {                                  // will delete object with matching token in tokens array in db
       tokens: {token}                         // use return to pass back to server.js
     }

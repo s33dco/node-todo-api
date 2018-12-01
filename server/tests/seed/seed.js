@@ -4,23 +4,10 @@ const {User}    = require('./../../models/user');
 const jwt       = require('jsonwebtoken');
 
 
-// seed data for todos
-const todos   = [
-  {
-    _id: new ObjectID(),
-  text : 'First thing todo'
-  },{
-    _id: new ObjectID(),
-  text : 'Second thing todo',
-  completed: true,
-  completedAt : 333
-}
-];
-
-// seed data for users
-
+// user seed data
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
+
 const users   = [
   {
     _id: userOneId,
@@ -34,10 +21,29 @@ const users   = [
   {
     _id: userTwoId,
     email: 'notokens@example.com',
-    password: 'user2Password'
+    password: 'user2Password',
+    tokens: [{
+      access: 'auth',
+      token : jwt.sign({_id : userTwoId, access: 'auth'}, 'abc123').toString()
+    }]
   }
 ];
 
+
+// todo seed data
+const todos   = [
+  {
+    _id: new ObjectID(),
+  text : 'First thing todo',
+  _creator: userOneId
+  },{
+    _id: new ObjectID(),
+  text : 'Second thing todo',
+  completed: true,
+  completedAt : 333,
+  _creator: userTwoId
+}
+];
 
 // functions to delete and repopulate collections
 
